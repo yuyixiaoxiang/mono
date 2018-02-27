@@ -79,6 +79,13 @@ if [ -x "/usr/bin/dpkg-architecture" ];
 	mkdir -p ~/.config/.mono/
 	wget -qO- https://download.mono-project.com/test/new-certs.tgz| tar zx -C ~/.config/.mono/
 fi
+
+if [[ ${CI_TAGS} == *'win-'* ]];
+then
+	mkdir -p ~/.config/.mono/
+	wget -qO- https://download.mono-project.com/test/new-certs.tgz| tar zx -C ~/.config/.mono/
+fi
+
 if [[ ${CI_TAGS} != *'mac-sdk'* ]]; # Mac SDK builds Mono itself
 	then
 	${TESTCMD} --label=configure --timeout=60m --fatal ./autogen.sh $EXTRA_CONF_FLAGS
