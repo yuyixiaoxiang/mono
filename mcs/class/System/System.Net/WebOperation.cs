@@ -60,10 +60,11 @@ namespace System.Net
 #if MONO_WEB_DEBUG
 		static int nextID;
 		internal readonly int ID = ++nextID;
-		string ME => $"WO({ID},{Connection?.ID ?? -1})";
+		internal string ME => $"WO({ID},{Connection?.ID ?? -1})";
 #else
 		internal readonly int ID;
-		string ME;
+
+		internal string ME => null;
 #endif
 
 		public WebOperation (HttpWebRequest request, BufferOffsetSize writeBuffer, bool isNtlmChallenge, CancellationToken cancellationToken)
