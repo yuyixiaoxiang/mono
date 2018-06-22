@@ -165,7 +165,7 @@ namespace System.Net
 						taskList.Add (item.Item3);
 				}
 
-				Debug ($"MAIN LOOP #1: operations={operationArray.Length} idle={idleArray.Length}");
+				Debug ($"MAIN LOOP #1: operations={operationArray.Length} idle={idleArray.Length} maxIdleTime={maxIdleTime} finalCleanup={finalCleanup}");
 
 				var ret = await Task.WhenAny (taskList).ConfigureAwait (false);
 
@@ -336,10 +336,8 @@ namespace System.Net
 
 			// Is there anything in the queue?
 			var next = group.GetNextOperation ();
-			if (next == null) {
-				Debug ($"{me} no pending operations.");
+			if (next == null)
 				return false;
-			}
 
 			Debug ($"{me} found pending operation Op={next.ID}");
 
@@ -582,9 +580,9 @@ namespace System.Net
 
 			public (WebConnection connection, bool created) CreateOrReuseConnection (WebOperation operation, bool force)
 			{
-				Scheduler.Debug ($"CREATE OR REUSE: group={ID} OP={operation.ID} force={force}");
+				Scheduler.Debug ($"CREATE OR REUSE: group={ID} Op={operation.ID} force={force}");
 				var connection = FindIdleConnection (operation);
-				Scheduler.Debug ($"CREATE OR REUSE #1: group={ID} OP={operation.ID} force={force} - connection={connection?.ID}");
+				Scheduler.Debug ($"CREATE OR REUSE #1: group={ID} Op={operation.ID} force={force} - connection={connection?.ID}");
 				if (connection != null)
 					return (connection, false);
 
