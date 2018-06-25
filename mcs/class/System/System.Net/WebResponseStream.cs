@@ -182,7 +182,7 @@ namespace System.Net
 				() => {
 					Operation.Abort ();
 					innerStream.Dispose ();
-				}, cancellationToken);
+				}, () => Operation.Aborted, cancellationToken);
 		}
 
 		bool CheckAuthHeader (string headerName)
