@@ -3969,6 +3969,12 @@ collect_appdomain_thread (gpointer key, gpointer value, gpointer user_data)
 	if (mono_thread_internal_has_appdomain_ref (thread, domain)) {
 		/* printf ("ABORTING THREAD %p BECAUSE IT REFERENCES DOMAIN %s.\n", thread->tid, domain->friendly_name); */
 
+		// Hack to avoid waiting for reverse pinvoked threads that don't end on their own
+		if (thread->flags & MONO_THREAD_FLAG_DONT_MANAGE) {
+			THREAD_DEBUG (g_message ("%s: ignoring reverse pinvoked thread %"G_GSIZE_FORMAT, __func__, (gsize)thread->tid));
+			return; /* just leave, ignore */
+		}
+
 		if(data->wait.num<MONO_W32HANDLE_MAXIMUM_WAIT_OBJECTS) {
 			data->wait.handles [data->wait.num] = mono_threads_open_thread_handle (thread->handle);
 			data->wait.threads [data->wait.num] = thread;
@@ -4760,6 +4766,14 @@ mono_thread_set_state (MonoInternalThread *thread, MonoThreadState state)
 {
 	LOCK_THREAD (thread);
 	thread->state |= state;
+	UNLOCK_THREAD (thread);
+}
+
+void
+mono_thread_set_flags (MonoInternalThread *thread, MonoThreadFlags flags)
+{
+	LOCK_THREAD (thread);
+	thread->flags |= flags;
 	UNLOCK_THREAD (thread);
 }
 

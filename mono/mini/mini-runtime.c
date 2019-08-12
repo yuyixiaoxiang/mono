@@ -852,7 +852,9 @@ mono_jit_thread_attach (MonoDomain *domain)
 		mono_thread_attach (domain);
 
 		// #678164
-		mono_thread_set_state (mono_thread_internal_current (), ThreadState_Background);
+		MonoInternalThread *thread = mono_thread_internal_current ();
+		mono_thread_set_state (thread, ThreadState_Background);
+		mono_thread_set_flags (thread, MONO_THREAD_FLAG_DONT_MANAGE); // Hack to avoid waiting for reverse pinvoked threads that don't end
 	}
 
 	orig = mono_domain_get ();
