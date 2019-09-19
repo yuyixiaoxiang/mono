@@ -64,12 +64,15 @@ need_link_unlink=no
 
 AC_ARG_WITH([macversion],
 	[  --with-macversion=<version>    Choose minimum macos version],
-	[], [with_macversion=10.4])
+	[], [with_macversion=10.14])
 
 if test -z $MACSDKOPTIONS; then
-MACSYSROOTBASE="-isysroot /Developer/SDKs"
-if [[ "$with_macversion" == "10.4" ]]; then
-  MACSYSROOT="$MACSYSROOTBASE/MacOSX10.4u.sdk"
+#MACSYSROOTBASE="-isysroot /Developer/SDKs"
+MACSYSROOTBASE="-isysroot /Library/Developer/CommandLineTools/SDKs"
+
+
+if [[ "$with_macversion" == "10.14" ]]; then
+  MACSYSROOT="$MACSYSROOTBASE/MacOSX10.14.sdk"
 else
   MACSYSROOT="$MACSYSROOTBASE/MacOSX""$with_macversion"".sdk"
 fi
