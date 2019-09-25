@@ -208,11 +208,11 @@ g_get_charset (G_CONST_RETURN char **charset)
 {
 	if (my_charset == NULL) {
 		/* These shouldn't be heap allocated */
-#if defined(HAVE_LOCALCHARSET_H)
-		my_charset = locale_charset ();
-#else
+// #if defined(HAVE_LOCALCHARSET_H)
+// 		my_charset = locale_charset ();
+// #else
 		my_charset = "UTF-8";
-#endif
+// #endif
 		is_utf8 = strcmp (my_charset, "UTF-8") == 0;
 	}
 	
