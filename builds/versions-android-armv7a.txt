@@ -1,0 +1,7 @@
+mono-version =
+unity-mono-revision = 1e7dd0e6883dbfa97090040ca335daff6cdc185f
+
+unity-mono-build-scripts-revision = 1e7dd0e6883dbfa97090040ca335daff6cdc185f
+
+build-date = 2019年 9月26日 星期四 18时48分13秒 CST
+
