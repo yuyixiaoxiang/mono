@@ -20,7 +20,6 @@ my $includesroot = "$buildsroot/include";
 my $sourcesroot = "$buildsroot/source";
 my $distdir = "$buildsroot/monodistribution";
 my $buildMachine = $ENV{UNITY_THISISABUILDMACHINE};
-
 # This script should not be ran on windows, if it is, kindly call the wrapper
 # to switch over to cygwin
 if ($^O eq "MSWin32")
@@ -47,7 +46,7 @@ my $runRuntimeTests=1;
 my $runClasslibTests=1;
 my $checkoutOnTheFly=0;
 my $forceDefaultBuildDeps=0;
-my $existingMonoRootPath = '';
+my $existingMonoRootPath = "";
 my $sdk = '';
 my $arch32 = 0;
 my $winPerl = "";
@@ -64,7 +63,7 @@ my $iphoneSimulatorArch="";
 my $tizen=0;
 my $tizenEmulator=0;
 my $windowsSubsystemForLinux=0;
-my $stevedoreBuildDeps=1;
+my $stevedoreBuildDeps=0;
 
 # Handy troubleshooting/niche options
 my $skipMonoMake=0;
@@ -168,7 +167,8 @@ if ($android || $iphone || $iphoneCross || $iphoneSimulator || $tizen || $tizenE
 
 # Do any settings agnostic per-platform stuff
 my $externalBuildDeps = "";
-
+$stevedoreBuildDeps = 0;
+print "----------------------------------------log{buildDeps}:$buildDeps\n";
 if ($buildDeps ne "" && not $forceDefaultBuildDeps)
 {
 	$externalBuildDeps = $buildDeps;
@@ -184,13 +184,13 @@ else
 		$externalBuildDeps = "$monoroot/../../mono-build-deps/build";
 	}	
 }
-print(">>> External build deps = $externalBuildDeps\n");
+print(">>> External build deps path= $externalBuildDeps\n");
 
 # Only clean up the path if the directory exists, if it doesn't exist,
 # abs_path ends up returning an empty string
 $externalBuildDeps = abs_path($externalBuildDeps) if (-d $externalBuildDeps);
 
-my $extraBuildTools = "$monoroot/../../mono-build-tools-extra/build";
+# my $extraBuildTools = "$monoroot/../../mono-build-tools-extra/build";
 
 my $existingExternalMonoRoot = "$externalBuildDeps/MonoBleedingEdge";
 my $existingExternalMono = "";
@@ -281,23 +281,23 @@ if ($build)
 		push @configureparams, "--with-monotouch=no";
 	}
 
-	if (!(-d "$extraBuildTools"))
-	{
-		# Check out on the fly
-		print(">>> Checking out mono build tools extra to : $extraBuildTools\n");
-		my $repo = 'git@github.cds.internal.unity3d.com:unity/mono-build-tools-exta.git';
-		print(">>> Cloning $repo at $extraBuildTools\n");
-		my $checkoutResult = system("git", "clone", "--recurse-submodules", $repo, "$extraBuildTools");
+	# 这个库没有权限，不能clone，貌似也没啥用。暂时注掉
+	# if (!(-d "$extraBuildTools"))
+	# {
+	# 	# Check out on the fly
+	# 	print(">>> Checking out mono build tools extra to : $extraBuildTools\n");
+	# 	my $repo = 'git@github.cds.internal.unity3d.com:unity/mono-build-tools-exta.git';
+	# 	print(">>> Cloning $repo at $extraBuildTools\n");
+	# 	my $checkoutResult = system("git", "clone", "--recurse-submodules", $repo, "$extraBuildTools");
 
-		if ($checkoutResult ne 0)
-		{
-			die("Failed to checkout mono build tools extra\n");
-		}
+	# 	if ($checkoutResult ne 0)
+	# 	{
+	# 		die("Failed to checkout mono build tools extra\n");
+	# 	}
 
-		# Only clean up if the dir exists.   Otherwise abs_path will return empty string
-		$extraBuildTools = abs_path($extraBuildTools) if (-d $extraBuildTools);
-	}
-
+	# 	# Only clean up if the dir exists.   Otherwise abs_path will return empty string
+	# 	$extraBuildTools = abs_path($extraBuildTools) if (-d $extraBuildTools);
+	# }
 	if ($existingMonoRootPath eq "")
 	{
 		print(">>> No existing mono supplied.  Checking for external...\n");
@@ -306,6 +306,7 @@ if ($build)
 		{
 			if($stevedoreBuildDeps)
 			{
+				# 不能执行，下载不下来。。。。。。。fuck !!!
 				print(">>> Running bee to download build-deps...\n");
 				chdir($buildscriptsdir) eq 1 or die ("failed to chdir to $buildscriptsdir directory\n");
 				system("./bee") eq 0 or die ("failed to run bee\n");
@@ -317,7 +318,7 @@ if ($build)
 				{
 					print(">>> No external build deps found.  Might as well try to check them out.  If it fails, we'll continue and trust mono is in your PATH\n");
 				}
-
+				# 这个地方也下载不下来，没有权限 fuck !!!
 				# Check out on the fly
 				print(">>> Checking out mono build dependencies to : $externalBuildDeps\n");
 				my $repo = "https://ono.unity3d.com/unity-extra/mono-build-deps";
@@ -363,6 +364,7 @@ if ($build)
 		die("Existing mono not found at : $existingMonoRootPath\n");
 	}
 
+	$externalBuildDeps = "";
 	if ($externalBuildDeps ne "")
 	{
 		print "\n";
@@ -473,21 +475,21 @@ if ($build)
 	my $macSdkPath = "";
 	my $macversion = '10.8';
 	my $darwinVersion = "10";
-	if ($^O eq 'darwin')
-	{
-		if ($sdk eq '')
-		{
-			$sdk='10.11';
-		}
+	# if ($^O eq 'darwin')
+	# {
+	# 	if ($sdk eq '')
+	# 	{
+	# 		$sdk='10.11';
+	# 	}
 
-		my $macBuildEnvDir = "$externalBuildDeps/MacBuildEnvironment";
-		$macSdkPath = "$macBuildEnvDir/builds/MacOSX$sdk.sdk";
-		if (! -d $macSdkPath)
-		{
-			print(">>> Unzipping mac build toolchain\n");
-			system("unzip", '-qd', "$macBuildEnvDir", "$macBuildEnvDir/builds.zip") eq 0 or die ("failed unzipping mac build toolchain\n");
-		}
-	}
+	# 	my $macBuildEnvDir = "$externalBuildDeps/MacBuildEnvironment";
+	# 	$macSdkPath = "$macBuildEnvDir/builds/MacOSX$sdk.sdk";
+	# 	if (! -d $macSdkPath)
+	# 	{
+	# 		print(">>> Unzipping mac build toolchain\n");
+	# 		system("unzip", '-qd', "$macBuildEnvDir", "$macBuildEnvDir/builds.zip") eq 0 or die ("failed unzipping mac build toolchain\n");
+	# 	}
+	# }
 
 	if ($iphone || $iphoneSimulator)
 	{
@@ -696,12 +698,12 @@ if ($build)
 	}
 	elsif ($android)
 	{
-		if (!(-d $externalBuildDeps))
-		{
-			die("mono build deps are required and the directory was not found : $externalBuildDeps\n");
-		}
+		# if (!(-d $externalBuildDeps))
+		# {
+		# 	die("mono build deps are required and the directory was not found : $externalBuildDeps\n");
+		# }
 
-		my $ndkVersion = "r13b";
+		my $ndkVersion = "r10e";
 		my $isArmArch = 1;
 		my $toolchainName = "";
 		my $platformRootPostfix = "";
@@ -768,7 +770,7 @@ if ($build)
 		print(">>> Android NDK Extraction Destination = $depsNdkFinal\n");
 		print("\n");
 
-		$ENV{ANDROID_NDK_ROOT} = "$depsNdkFinal";
+		$ENV{ANDROID_NDK_ROOT} = "/Users/user/Documents/android-ndk-r10e";#"$depsNdkFinal";
 
 		if (-d $depsNdkFinal)
 		{
@@ -778,40 +780,40 @@ if ($build)
 		{
 			print(">>> Android NDK needs to be extracted\n");
 
-			if ($runningOnWindows)
-			{
-				my $sevenZip = "$externalBuildDeps/7z/win64/7za.exe";
-				my $winDepsNdkArchive = `cygpath -w $depsNdkArchive`;
-				my $winDepsNdkExtract = `cygpath -w $externalBuildDeps`;
+			# if ($runningOnWindows)
+			# {
+			# 	my $sevenZip = "$externalBuildDeps/7z/win64/7za.exe";
+			# 	my $winDepsNdkArchive = `cygpath -w $depsNdkArchive`;
+			# 	my $winDepsNdkExtract = `cygpath -w $externalBuildDeps`;
 
-				# clean up trailing new lines that end up in the output from cygpath.  If left, they cause problems down the line
-				# for 7zip
-				$winDepsNdkArchive =~ s/\n+$//;
-				$winDepsNdkExtract =~ s/\n+$//;
+			# 	# clean up trailing new lines that end up in the output from cygpath.  If left, they cause problems down the line
+			# 	# for 7zip
+			# 	$winDepsNdkArchive =~ s/\n+$//;
+			# 	$winDepsNdkExtract =~ s/\n+$//;
 
-				system($sevenZip, "x", "$winDepsNdkArchive", "-o$winDepsNdkExtract");
-			}
-			else
-			{
-				my ($name,$path,$suffix) = fileparse($depsNdkArchive, qr/\.[^.]*/);
+			# 	system($sevenZip, "x", "$winDepsNdkArchive", "-o$winDepsNdkExtract");
+			# }
+			# else
+			# {
+			# 	my ($name,$path,$suffix) = fileparse($depsNdkArchive, qr/\.[^.]*/);
 
-				print(">>> Android NDK Extension = $suffix\n");
+			# 	print(">>> Android NDK Extension = $suffix\n");
 
-				# Versions after r11 use .zip extension.  Currently we use r10e, but let's support the .zip extension in case
-				# we upgrade down the road
-				if (lc $suffix eq '.zip')
-				{
-					system("unzip", "-q", $depsNdkArchive, "-d", $externalBuildDeps);
-				}
-				elsif (lc $suffix eq '.bin')
-				{	chmod(0755, $depsNdkArchive);
-					system($depsNdkArchive, "-o$externalBuildDeps");
-				}
-				else
-				{
-					die "Unknown file extension '" . $suffix . "'\n";
-				}
-			}
+			# 	# Versions after r11 use .zip extension.  Currently we use r10e, but let's support the .zip extension in case
+			# 	# we upgrade down the road
+			# 	if (lc $suffix eq '.zip')
+			# 	{
+			# 		system("unzip", "-q", $depsNdkArchive, "-d", $externalBuildDeps);
+			# 	}
+			# 	elsif (lc $suffix eq '.bin')
+			# 	{	chmod(0755, $depsNdkArchive);
+			# 		system($depsNdkArchive, "-o$externalBuildDeps");
+			# 	}
+			# 	else
+			# 	{
+			# 		die "Unknown file extension '" . $suffix . "'\n";
+			# 	}
+			# }
 		}
 
 		if (!(-f "$ENV{ANDROID_NDK_ROOT}/ndk-build"))
@@ -1506,28 +1508,28 @@ else
 	print(">>> Skipping build\n");
 }
 
-if ($buildUsAndBoo)
-{
-	print(">>> Building Unity Script and Boo...\n");
-	if($windowsSubsystemForLinux)
-	{
-		#boo scripts expect a bin-platform folder, but we haven't built them that way
-		system("ln -s $monoprefix/bin $monoprefix/bin-linux64");
-		system("ln -s $monoprefix/bin $monoprefix/bin-linux32");
-	}
+# if ($buildUsAndBoo)
+# {
+# 	print(">>> Building Unity Script and Boo...\n");
+# 	if($windowsSubsystemForLinux)
+# 	{
+# 		#boo scripts expect a bin-platform folder, but we haven't built them that way
+# 		system("ln -s $monoprefix/bin $monoprefix/bin-linux64");
+# 		system("ln -s $monoprefix/bin $monoprefix/bin-linux32");
+# 	}
 
-	system(@commandPrefix, ("perl", "$buildscriptsdir/build_us_and_boo.pl", "--monoprefix=$monoprefix")) eq 0 or die ("Failed building Unity Script and Boo\n");
+# 	system(@commandPrefix, ("perl", "$buildscriptsdir/build_us_and_boo.pl", "--monoprefix=$monoprefix")) eq 0 or die ("Failed building Unity Script and Boo\n");
 
-	print(">>> Copying Unity Script and Boo *.Lang.dll's from 4.5 profile to unityjit profile...\n");
-	system("cp $monoprefix/lib/mono/4.5/Boo*.dll $monoprefix/lib/mono/unityjit/.") eq 0 or die("Failed copying Boo*.dll\n");
-	system("cp $monoprefix/lib/mono/4.5/UnityScript*.dll $monoprefix/lib/mono/unityjit/.") eq 0 or die("Failed copying UnityScript*.dll\n");
-	system("cp $monoprefix/lib/mono/4.5/booc.exe $monoprefix/lib/mono/unityjit/.") eq 0 or die("Failed copying booc.exe\n");
-	system("cp $monoprefix/lib/mono/4.5/us.exe $monoprefix/lib/mono/unityjit/.") eq 0 or die("Failed copying us.exe\n");
-}
-else
-{
-	print(">>> Skipping build Unity Script and Boo\n");
-}
+# 	print(">>> Copying Unity Script and Boo *.Lang.dll's from 4.5 profile to unityjit profile...\n");
+# 	system("cp $monoprefix/lib/mono/4.5/Boo*.dll $monoprefix/lib/mono/unityjit/.") eq 0 or die("Failed copying Boo*.dll\n");
+# 	system("cp $monoprefix/lib/mono/4.5/UnityScript*.dll $monoprefix/lib/mono/unityjit/.") eq 0 or die("Failed copying UnityScript*.dll\n");
+# 	system("cp $monoprefix/lib/mono/4.5/booc.exe $monoprefix/lib/mono/unityjit/.") eq 0 or die("Failed copying booc.exe\n");
+# 	system("cp $monoprefix/lib/mono/4.5/us.exe $monoprefix/lib/mono/unityjit/.") eq 0 or die("Failed copying us.exe\n");
+# }
+# else
+# {
+# 	print(">>> Skipping build Unity Script and Boo\n");
+# }
 
 if ($artifact)
 {
