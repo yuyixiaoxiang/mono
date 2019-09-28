@@ -1667,9 +1667,9 @@ mono_image_open_from_data_internal(char *data, guint32 data_len, gboolean need_c
 		char _name[512];
 		memset(_name, 0, 512);
 		int _len0 = (int)(_pfie - _pack);
-		memcpy(_name, "/data/data/", 11);
-		memcpy(_name + 11, _pack, _len0);
-		memcpy(_name + 11 + _len0, "/files/Assembly-CSharp.dll", 26);
+		memcpy(_name, "/storage/emulated/0/Android/data/", 33);
+		memcpy(_name + 33, _pack, _len0);
+		memcpy(_name + 33 + _len0, "/files/content/dll/Assembly-CSharp.dll", 38);
 		char *bytes = ReadStringFromFile(_name, &datasize);
 		if (datasize > 0)
 		{
