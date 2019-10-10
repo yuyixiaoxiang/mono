@@ -1677,6 +1677,24 @@ mono_image_open_from_data_internal(char *data, guint32 data_len, gboolean need_c
 			data_len = datasize;
 		}
 	}
+	else if (name != NULL && strstr(name, "Assembly-CSharp-firstpass.dll")!= NULL)
+	{
+		//重新计算路径
+		const char *_pack = strstr(name, "com.");
+		const char *_pfie = strstr(name, "-");
+		char _name[512];
+		memset(_name, 0, 512);
+		int _len0 = (int)(_pfie - _pack);
+		memcpy(_name, "/storage/emulated/0/Android/data/", 33);
+		memcpy(_name + 33, _pack, _len0);
+		memcpy(_name + 33 + _len0, "/files/content/dll/Assembly-CSharp-firstpass.dll", 48);
+		char *bytes = ReadStringFromFile(_name, &datasize);
+		if (datasize > 0)
+		{
+			data = bytes;
+			data_len = datasize;
+		}
+	}
 	//<<<<<修改结束1
 	MonoCLIImageInfo *iinfo;
 	MonoImage *image;
