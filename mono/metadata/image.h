@@ -4,10 +4,45 @@
 
 #ifndef _MONONET_METADATA_IMAGE_H_ 
 #define _MONONET_METADATA_IMAGE_H_
-
+#include <stdlib.h>
 #include <stdio.h>
 #include <mono/utils/mono-publib.h>
 #include <mono/utils/mono-error.h>
+
+
+
+
+
+
+/**
+ * Function: xxtea_encrypt
+ * @data:    Data to be encrypted
+ * @len:     Length of the data to be encrypted
+ * @key:     Symmetric key
+ * @out_len: Pointer to output length variable
+ * Returns:  Encrypted data or %NULL on failure
+ *
+ * Caller is responsible for freeing the returned buffer.
+ */
+void * xxtea_encrypt(const void * data, size_t len, const void * key, size_t * out_len);
+
+/**
+ * Function: xxtea_decrypt
+ * @data:    Data to be decrypted
+ * @len:     Length of the data to be decrypted
+ * @key:     Symmetric key
+ * @out_len: Pointer to output length variable
+ * Returns:  Decrypted data or %NULL on failure
+ *
+ * Caller is responsible for freeing the returned buffer.
+ */
+void * xxtea_decrypt(const void * data, size_t len, const void * key, size_t * out_len);
+
+
+
+
+
+
 
 MONO_BEGIN_DECLS
 
@@ -84,5 +119,11 @@ MONO_API void          mono_image_add_to_name_cache (MonoImage *image,
 MONO_API mono_bool     mono_image_has_authenticode_entry (MonoImage *image);
 
 MONO_END_DECLS
+
+
+
+
+
+
 
 #endif
